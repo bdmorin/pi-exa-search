@@ -150,7 +150,14 @@ Prompts like these work especially well:
 
 ## Releases
 
-This repo uses [Changesets](https://github.com/changesets/changesets) for versioning and changelog management, but publishing is currently done **manually** from a trusted local machine.
+This repo uses [Changesets](https://github.com/changesets/changesets) for versioning and changelog management, but publishing is still done **manually** from a trusted local machine.
+
+GitHub Releases are created locally with GitHub CLI via `npm run release:github`.
+
+Prerequisites:
+
+- `gh` installed locally
+- `gh auth login` completed for the target GitHub account
 
 Typical workflow:
 
@@ -158,26 +165,49 @@ Typical workflow:
 2. Run `npm run changeset`
 3. Commit the generated changeset file
 4. Merge to `main`
-5. On your local machine, run `npm run version-packages`
-6. Commit the version bump and changelog update
-7. Push that commit to `main`
-8. Run `npm publish --access public`
+5. On your local machine, run `npm run check`
+6. Run `npm run version-packages`
+7. Commit the version bump and changelog update
+8. Push that commit to `main`
+9. Run `npm publish --access public`
+10. Run `npm run release:github`
 
 Helpful commands:
 
 ```bash
 npm run release:dry-run
 npm publish --access public
+npm run release:github
 ```
 
-The release GitHub Action is now a manual readiness check: it runs validation plus `npm run release:dry-run`, then prints the manual publish steps in the workflow summary.
+If you prefer shorter local commands, the repo also ships a thin `Makefile` wrapper:
+
+```bash
+make help
+make check
+make release-dry-run
+make version-packages
+make release-github
+```
+
+The release GitHub Action is a manual readiness check: it runs validation plus `npm run release:dry-run`, then prints the local release steps in the workflow summary.
 
 ## Development
+
+You can use npm scripts directly:
 
 ```bash
 npm install
 npm run format
 npm run check
+```
+
+Or the equivalent Make targets:
+
+```bash
+make install
+make format
+make check
 ```
 
 The repo includes:

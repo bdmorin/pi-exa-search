@@ -38,8 +38,10 @@ jobs:
             echo
             echo "Publishing for this repo is done manually from a trusted local machine."
             echo
-            echo '1. `npm run version-packages`'
-            echo '2. Commit the version bump and changelog update'
-            echo '3. Push to `main`'
-            echo '4. `npm publish --access public`'
+            echo '1. `npm run check`'
+            echo '2. `npm run version-packages`'
+            echo '3. Commit the version bump and changelog update'
+            echo '4. Push to `main`'
+            echo '5. `npm publish --access public`'
+            echo '6. `npm run release:github`'
           } >> "$GITHUB_STEP_SUMMARY"

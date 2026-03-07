@@ -37,6 +37,7 @@
 		"check": "biome check . && npm run typecheck && npm run test",
 		"prepublishOnly": "npm run check",
 		"release:dry-run": "node ./scripts/release-dry-run.mjs",
+		"release:github": "node ./scripts/release-github.mjs",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
 		"release": "changeset publish"
