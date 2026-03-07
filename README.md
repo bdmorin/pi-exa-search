@@ -1,5 +1,5 @@
 <p>
-  <img src="https://raw.githubusercontent.com/najibninaba/pi-exa-search/main/assets/header.svg" alt="pi-exa-search banner" width="1100">
+  <img src="https://raw.githubusercontent.com/najibninaba/pi-exa-search/main/assets/header.svg" alt="pi-exa-search banner" width="100%">
 </p>
 
 # pi-exa-search
