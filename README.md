@@ -172,12 +172,21 @@ Typical workflow:
 9. Run `npm publish --access public`
 10. Run `npm run release:github`
 
+If you prefer a single final step after pushing the version bump commit to `main`, use:
+
+```bash
+make release
+```
+
+That target runs validation, publishes to npm, then creates the GitHub Release for the current package version.
+
 Helpful commands:
 
 ```bash
 npm run release:dry-run
 npm publish --access public
 npm run release:github
+make release
 ```
 
 If you prefer shorter local commands, the repo also ships a thin `Makefile` wrapper:
@@ -187,6 +196,7 @@ make help
 make check
 make release-dry-run
 make version-packages
+make release
 make release-github
 ```
 

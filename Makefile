@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install format lint typecheck test check release-dry-run changeset version-packages release-github
+.PHONY: help install format lint typecheck test check release-dry-run changeset version-packages release release-github
 
 help:
 	@printf '%s\n' \
@@ -14,6 +14,7 @@ help:
 		'  make release-dry-run' \
 		'  make changeset' \
 		'  make version-packages' \
+		'  make release' \
 		'  make release-github'
 
 install:
@@ -42,6 +43,11 @@ changeset:
 
 version-packages:
 	npm run version-packages
+
+release:
+	npm run check
+	npm publish --access public
+	npm run release:github
 
 release-github:
 	npm run release:github
