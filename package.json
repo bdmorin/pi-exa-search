@@ -1,6 +1,6 @@
 {
 	"name": "pi-exa-search",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Exa-powered source discovery and search workflows for Pi.",
 	"type": "module",
 	"license": "MIT",
