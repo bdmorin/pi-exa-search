@@ -1,3 +1,8 @@
+---
+name: exa-web-research
+description: Use Exa for source discovery and multi-angle web research. Best for fresh topics, source hunting, and shortlisting high-quality URLs before deeper extraction.
+---
+
 # Exa Web Research
 
 Use `exa_search` for **source discovery**.
