@@ -152,7 +152,7 @@ Prompts like these work especially well:
 
 ## Releases
 
-This repo uses [Changesets](https://github.com/changesets/changesets) for versioning and changelog management.
+This repo uses [Changesets](https://github.com/changesets/changesets) for versioning and changelog management, but publishing is currently done **manually** from a trusted local machine.
 
 Typical workflow:
 
@@ -160,9 +160,19 @@ Typical workflow:
 2. Run `npm run changeset`
 3. Commit the generated changeset file
 4. Merge to `main`
-5. Let the release workflow open or update the release PR
+5. On your local machine, run `npm run version-packages`
+6. Commit the version bump and changelog update
+7. Push that commit to `main`
+8. Run `npm publish --access public`
 
-When the release PR is merged, GitHub Actions updates the version, writes the changelog, tags the release, and publishes to npm when `NPM_TOKEN` is configured.
+Helpful commands:
+
+```bash
+npm run release:dry-run
+npm publish --access public
+```
+
+The release GitHub Action is now a manual readiness check: it runs validation plus `npm run release:dry-run`, then prints the manual publish steps in the workflow summary.
 
 ## Development
 

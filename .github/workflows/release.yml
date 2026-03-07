@@ -1,17 +1,13 @@
-name: release
+name: release-readiness
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+  contents: read
 
 jobs:
-  release:
+  release-readiness:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,13 +28,18 @@ jobs:
       - name: Run checks
         run: npm run check
 
-      - name: Create release PR or publish package
-        uses: changesets/action@v1
-        with:
-          version: npm run version-packages
-          publish: npm run release
-          commit: "chore: release package"
-          title: "chore: release package"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Run publish dry-run
+        run: npm run release:dry-run
+
+      - name: Write manual release instructions
+        run: |
+          {
+            echo "## Manual release workflow"
+            echo
+            echo "Publishing for this repo is done manually from a trusted local machine."
+            echo
+            echo '1. `npm run version-packages`'
+            echo '2. Commit the version bump and changelog update'
+            echo '3. Push to `main`'
+            echo '4. `npm publish --access public`'
+          } >> "$GITHUB_STEP_SUMMARY"

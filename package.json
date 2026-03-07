@@ -35,6 +35,8 @@
 		"test": "vitest --run --coverage",
 		"test:watch": "vitest",
 		"check": "biome check . && npm run typecheck && npm run test",
+		"prepublishOnly": "npm run check",
+		"release:dry-run": "node ./scripts/release-dry-run.mjs",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
 		"release": "changeset publish"
