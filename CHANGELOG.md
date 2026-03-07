@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+### Patch Changes
+
+- fb06f58: Add required `description` field to skill frontmatter to fix skill validation conflict
+
 ## 0.1.2
 
 ### Patch Changes
