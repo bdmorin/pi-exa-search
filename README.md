@@ -42,21 +42,19 @@ This package fills a different gap:
 
 You can install and use `pi-exa-search` on its own.
 
-For the complete experience, also install [`pi-web-access`](https://github.com/nicobailon/pi-web-access) by nicobailon.
-
-### From a local path
+The canonical install method is npm:
 
 ```bash
-pi install ~/Hacks/pi-exa-search
+pi install npm:pi-exa-search
 ```
 
-### From GitHub
+For the complete experience, also install [`pi-web-access`](https://github.com/nicobailon/pi-web-access) by nicobailon:
 
 ```bash
-pi install git:github.com/najibninaba/pi-exa-search
+pi install npm:pi-web-access
 ```
 
-You can also pin a ref:
+For development or testing, you can still install from GitHub and pin a ref:
 
 ```bash
 pi install git:github.com/najibninaba/pi-exa-search@main
