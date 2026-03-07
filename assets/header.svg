@@ -1,0 +1,89 @@
+<svg width="1200" height="360" viewBox="0 0 1200 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1120" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1220" />
+      <stop offset="0.52" stop-color="#101A32" />
+      <stop offset="1" stop-color="#07111F" />
+    </linearGradient>
+    <linearGradient id="accent" x1="208" y1="90" x2="456" y2="264" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" />
+      <stop offset="0.52" stop-color="#3B82F6" />
+      <stop offset="1" stop-color="#14B8A6" />
+    </linearGradient>
+    <linearGradient id="line" x1="146" y1="108" x2="460" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A78BFA" stop-opacity="0.9" />
+      <stop offset="1" stop-color="#2DD4BF" stop-opacity="0.9" />
+    </linearGradient>
+    <filter id="glow" x="90" y="46" width="420" height="254" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="20" result="blur" />
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0.35  0 0 1 0 0.75  0 0 0 0.24 0" />
+    </filter>
+  </defs>
+
+  <rect x="12" y="12" width="1176" height="336" rx="28" fill="url(#bg)" />
+  <rect x="12" y="12" width="1176" height="336" rx="28" stroke="#94A3B8" stroke-opacity="0.24" stroke-width="2" />
+
+  <g opacity="0.18">
+    <path d="M132 74H428" stroke="#93C5FD" stroke-width="1.5" stroke-dasharray="6 8" />
+    <path d="M102 148H474" stroke="#A78BFA" stroke-width="1.5" stroke-dasharray="6 8" />
+    <path d="M132 222H436" stroke="#2DD4BF" stroke-width="1.5" stroke-dasharray="6 8" />
+    <path d="M102 296H474" stroke="#93C5FD" stroke-width="1.5" stroke-dasharray="6 8" />
+  </g>
+
+  <g filter="url(#glow)">
+    <ellipse cx="278" cy="178" rx="124" ry="82" fill="url(#accent)" opacity="0.34" />
+  </g>
+
+  <g>
+    <path d="M170 112L226 144" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M170 112L170 214" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M170 214L240 248" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M226 144L300 126" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M226 144L264 198" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M264 198L338 176" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M264 198L240 248" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M300 126L382 154" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M338 176L382 154" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <path d="M338 176L390 228" stroke="url(#line)" stroke-width="6" stroke-linecap="round" />
+    <circle cx="170" cy="112" r="18" fill="#0F172A" stroke="#A78BFA" stroke-width="6" />
+    <circle cx="170" cy="214" r="18" fill="#0F172A" stroke="#60A5FA" stroke-width="6" />
+    <circle cx="226" cy="144" r="20" fill="#0F172A" stroke="#C084FC" stroke-width="6" />
+    <circle cx="240" cy="248" r="20" fill="#0F172A" stroke="#2DD4BF" stroke-width="6" />
+    <circle cx="300" cy="126" r="18" fill="#0F172A" stroke="#60A5FA" stroke-width="6" />
+    <circle cx="338" cy="176" r="18" fill="#0F172A" stroke="#93C5FD" stroke-width="6" />
+    <circle cx="382" cy="154" r="22" fill="#0F172A" stroke="#14B8A6" stroke-width="6" />
+    <circle cx="390" cy="228" r="18" fill="#0F172A" stroke="#A78BFA" stroke-width="6" />
+
+    <circle cx="334" cy="206" r="48" fill="none" stroke="#E2E8F0" stroke-width="10" />
+    <path d="M366 238L410 282" stroke="#E2E8F0" stroke-width="12" stroke-linecap="round" />
+  </g>
+
+  <g>
+    <text x="522" y="136" fill="#E5EEF9" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="54" font-weight="800" letter-spacing="-1.2">
+      pi-exa-search
+    </text>
+    <text x="524" y="176" fill="#93C5FD" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="20" font-weight="700">
+      Exa-powered source discovery for Pi
+    </text>
+    <text x="524" y="214" fill="#CBD5E1" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="22" font-weight="500">
+      Standalone-first URL discovery with an even stronger workflow when paired with pi-web-access.
+    </text>
+  </g>
+
+  <g>
+    <rect x="524" y="246" width="168" height="40" rx="20" fill="#111C33" stroke="#A78BFA" stroke-opacity="0.55" />
+    <text x="608" y="271" text-anchor="middle" fill="#F5F3FF" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="700">
+      Standalone first
+    </text>
+
+    <rect x="708" y="246" width="172" height="40" rx="20" fill="#111C33" stroke="#60A5FA" stroke-opacity="0.55" />
+    <text x="794" y="271" text-anchor="middle" fill="#EFF6FF" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="700">
+      Multi-query research
+    </text>
+
+    <rect x="896" y="246" width="182" height="40" rx="20" fill="#111C33" stroke="#2DD4BF" stroke-opacity="0.55" />
+    <text x="987" y="271" text-anchor="middle" fill="#ECFDF5" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="700">
+      Better with fetch_content
+    </text>
+  </g>
+</svg>
