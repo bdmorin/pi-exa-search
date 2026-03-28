@@ -1,228 +1,132 @@
-<p>
-  <img src="https://raw.githubusercontent.com/najibninaba/pi-exa-search/main/assets/header.svg" alt="pi-exa-search banner" width="100%">
-</p>
+# pi-exa
 
-# pi-exa-search
+Full Exa API coverage for [Pi](https://github.com/mariozechner/pi-coding-agent).
 
-[![Version](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/najibninaba/pi-exa-search/main/package.json&query=%24.version&label=version&style=for-the-badge)](https://github.com/najibninaba/pi-exa-search/blob/main/package.json)
-[![CI](https://img.shields.io/github/actions/workflow/status/najibninaba/pi-exa-search/ci.yml?branch=main&label=CI&style=for-the-badge)](https://github.com/najibninaba/pi-exa-search/actions/workflows/ci.yml)
-[![Versioning](https://img.shields.io/badge/versioning-Changesets-7C3AED?style=for-the-badge)](https://github.com/changesets/changesets)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+> **Hard fork of [`pi-exa-search`](https://github.com/najibninaba/pi-exa-search) by [najibninaba](https://github.com/najibninaba).** The original extension is a clean, well-tested implementation of Exa's search endpoint with highlights. This fork expands coverage to the full Exa API — all four endpoints, all search parameters, structured output, entity extraction, and evidence-backed skill guidance. Props to najibninaba for the solid foundation.
 
-Exa-powered source discovery for Pi.
+## What changed from upstream
 
-`pi-exa-search` works **standalone** for URL discovery and lightweight web research.
+| | upstream `pi-exa-search` | this fork `pi-exa` |
+|---|---|---|
+| **Endpoints** | `/search` (highlights only) | `/search`, `/contents`, `/findSimilar`, `/answer` |
+| **Tools** | `exa_search` | `exa_search`, `exa_contents`, `exa_find_similar`, `exa_answer` |
+| **Search params** | query, domains, dates, search type, highlights | + category, includeText/excludeText, crawl dates, userLocation, moderation, deep search (systemPrompt, outputSchema, additionalQueries) |
+| **Content modes** | highlights only | text, highlights (with custom query), summary (with JSON schema), livecrawl, subpages, extras |
+| **Search types** | auto, neural, instant, deep, deep-reasoning, deep-max | auto, fast, instant, neural, keyword, hybrid, deep, deep-reasoning (dropped deprecated deep-max) |
+| **Response fields** | title, url, date, author, highlights, summary, score | + image, favicon, highlightScores, entities (company/people), subpages, extras, deep search output with grounding/citations, resolvedSearchType, searchTime |
+| **numResults** | default 5, max 10 | default 10, max 100 |
+| **Unit tests** | 33 | 84 |
+| **Integration tests** | — | 21 (real Exa API) |
 
-For the complete experience, pair it with [`pi-web-access`](https://github.com/nicobailon/pi-web-access) by nicobailon so Pi can follow `exa_search` with `fetch_content` for full-page extraction.
+## Tools
 
-A good enhanced workflow is:
+### `exa_search` — Find sources
 
-1. `exa_search` finds strong candidate URLs
-2. `fetch_content` from `pi-web-access` extracts the best pages
-3. Pi synthesizes the final answer or sitrep
+Search the web with Exa. Supports all search types, category filters, content modes, deep search with structured output.
 
-## Why this exists
+```ts
+exa_search({ query: "latest AI regulation", recencyFilter: "week" })
+exa_search({ queries: ["coding agents", "developer workflow automation"], category: "news" })
+exa_search({ query: "top aerospace companies", searchType: "deep", outputSchema: { type: "object", properties: { companies: { type: "array" } } } })
+exa_search({ query: "transformer architecture", category: "research paper", contents: { text: { maxCharacters: 5000 } } })
+exa_search({ query: "Exa AI", category: "company" })  // returns structured entity data
+```
 
-`pi-web-access` is already very good at:
+### `exa_contents` — Extract from known URLs
 
-- fetching and extracting page content
-- handling blocked or JS-heavy pages
-- storing fetched results for follow-up
-- GitHub, YouTube, and video handling
+Fetch clean text, highlights, or summaries from URLs you already have. Handles JS-rendered pages, PDFs, complex layouts server-side.
 
-This package fills a different gap:
+```ts
+exa_contents({ urls: ["https://example.com/article"], contents: { text: { maxCharacters: 10000 } } })
+exa_contents({ urls: ["https://docs.example.com"], contents: { summary: true, subpages: 10, subpageTarget: "api" } })
+```
 
-- Exa-backed source discovery
-- fresh multi-query research workflows
-- domain include/exclude filtering
-- recency and published-date filtering
-- lightweight highlights before you decide what to fetch deeply
+### `exa_find_similar` — Snowball research
+
+Find pages similar to a given URL. Great for discovering more sources after finding one good one.
+
+```ts
+exa_find_similar({ url: "https://example.com/great-article", excludeSourceDomain: true, numResults: 10 })
+```
+
+### `exa_answer` — Grounded answers
+
+Ask a factual question, get an answer with citations. Exa searches, reads pages, synthesizes.
+
+```ts
+exa_answer({ query: "What caused the 2008 financial crisis?" })
+exa_answer({ query: "Compare React and Vue", systemPrompt: "Answer concisely for senior developers" })
+```
+
+### `/exasearch <query>` — Command
+
+Nudges Pi to use Exa-first workflow from the command line.
 
 ## Install
 
-You can install and use `pi-exa-search` on its own.
-
-The canonical install method is npm:
-
 ```bash
-pi install npm:pi-exa-search
+pi install git:github.com/bdmorin/pi-exa-search@main
 ```
 
-For the complete experience, also install [`pi-web-access`](https://github.com/nicobailon/pi-web-access) by nicobailon:
+For the complete experience with `fetch_content` fallbacks, also install [`pi-web-access`](https://github.com/nicobailon/pi-web-access):
 
 ```bash
 pi install npm:pi-web-access
 ```
 
-For development or testing, you can still install from GitHub and pin a ref:
-
-```bash
-pi install git:github.com/najibninaba/pi-exa-search@main
-```
-
-This package intentionally follows the same Pi package pattern as [`pi-web-access`](https://github.com/nicobailon/pi-web-access): the package ships TypeScript extension sources under `extensions/`, and Pi loads them directly.
-
 ## Configuration
 
 The extension reads your Exa API key from:
 
-1. `EXA_API_KEY` environment variable
-2. `~/.pi/exa-search.json`
+1. `EXA_API_KEY` environment variable (recommended — set in mise)
+2. `~/.pi/exa-search.json` with `{ "exaApiKey": "your-key" }`
 
-Example config file:
+Get a key at [dashboard.exa.ai/api-keys](https://dashboard.exa.ai/api-keys).
 
-```json
-{
-  "exaApiKey": "your-exa-api-key"
-}
-```
+## Search type performance (measured)
 
-## Tool
+| Type | Latency | Best for |
+|---|---|---|
+| `instant` | ~170ms | Real-time apps, chat, voice |
+| `fast` | ~770ms | Speed with minimal quality sacrifice |
+| `auto` | ~800ms | Default. Balanced quality and speed. |
+| `deep` | 5-60s | Complex queries, structured extraction |
+| `deep-reasoning` | 5-60s | Maximum reasoning depth |
 
-### `exa_search`
+## Category filters
 
-Search the web with Exa for source discovery.
+| Category | What it covers |
+|---|---|
+| `company` | 50M+ companies with structured entity data |
+| `people` | 1B+ people with work history, education |
+| `research paper` | 100M+ academic papers |
+| `news` | Current events, journalism |
+| `personal site` | Blogs, personal pages |
+| `financial report` | SEC filings, earnings |
+| `pdf` | PDF documents |
 
-It works on its own, and pairs well with `fetch_content` from [`pi-web-access`](https://github.com/nicobailon/pi-web-access) when deeper extraction is available.
+**Note:** `company` and `people` categories do NOT support date filters, text filters, or `excludeDomains`.
 
-#### Parameters
+## Content modes
 
-- `query` or `queries`, but not both
-- `numResults`
-- `searchType`: `auto`, `neural`, `instant`, `deep`, `deep-reasoning`, `deep-max`
-- `domainFilter`: array with normal domains to include and `-domain.com` to exclude
-- `includeDomains`
-- `excludeDomains`
-- `recencyFilter`: `day`, `week`, `month`, `year`
-- `startPublishedDate`
-- `endPublishedDate`
-- `highlightsMaxCharacters`
-
-#### Behavior notes
-
-- exactly one of `query` or `queries` must be provided
-- `recencyFilter` cannot be mixed with explicit published date bounds
-- date-only published date values are normalized to UTC day boundaries
-- domains are validated explicitly, invalid values raise an error instead of being silently dropped
-
-#### Examples
-
-```ts
-exa_search({ query: "latest AI regulation developments", recencyFilter: "day" })
-exa_search({ queries: ["coding agent tools", "developer workflow automation", "open-source agent frameworks"], recencyFilter: "month" })
-exa_search({ query: "enterprise browser security", domainFilter: ["reuters.com", "-reddit.com"] })
-```
-
-## Command
-
-### `/exasearch <query>`
-
-This command sends a user message that nudges Pi to:
-
-- use `exa_search`
-- select the best URLs
-- use `fetch_content` if deeper extraction is needed and available
-
-Useful when you want to force the Exa-first workflow from the command line.
-
-If `pi-web-access` is not installed, the command is still useful for Exa-first source discovery and URL shortlisting.
-
-## Recommended usage pattern
-
-### Standalone
-
-1. `exa_search`
-2. review the returned URLs, highlights, and metadata
-3. synthesize from those results or fetch pages with whatever other tooling you have available
-
-### With [`pi-web-access`](https://github.com/nicobailon/pi-web-access)
-
-1. `exa_search`
-2. choose the strongest URLs
-3. `fetch_content` on those URLs
-4. synthesize the answer
-
-Prompts like these work especially well:
-
-- "get a fresh sitrep on AI regulation in Europe"
-- "find recent coverage of semiconductor manufacturing trends"
-- "pull together good sources on browser automation tools"
-
-## Releases
-
-This repo uses [Changesets](https://github.com/changesets/changesets) for versioning and changelog management, but publishing is still done **manually** from a trusted local machine.
-
-GitHub Releases are created locally with GitHub CLI via `npm run release:github`.
-
-Prerequisites:
-
-- `gh` installed locally
-- `gh auth login` completed for the target GitHub account
-
-Typical workflow:
-
-1. Make a user-facing change
-2. Run `npm run changeset`
-3. Commit the generated changeset file
-4. Merge to `main`
-5. On your local machine, run `npm run check`
-6. Run `npm run version-packages`
-7. Commit the version bump and changelog update
-8. Push that commit to `main`
-9. Run `npm publish --access public`
-10. Run `npm run release:github`
-
-If you prefer a single final step after pushing the version bump commit to `main`, use:
-
-```bash
-make release
-```
-
-That target runs validation, publishes to npm, then creates the GitHub Release for the current package version.
-
-Helpful commands:
-
-```bash
-npm run release:dry-run
-npm publish --access public
-npm run release:github
-make release
-```
-
-If you prefer shorter local commands, the repo also ships a thin `Makefile` wrapper:
-
-```bash
-make help
-make check
-make release-dry-run
-make version-packages
-make release
-make release-github
-```
-
-The release GitHub Action is a manual readiness check: it runs validation plus `npm run release:dry-run`, then prints the local release steps in the workflow summary.
+| Mode | Tokens | Best for |
+|---|---|---|
+| `highlights` | 10x fewer | Agent workflows, factual lookups. Recommended `maxCharacters: 4000`. |
+| `text` | Full page | Deep analysis, complete context |
+| `summary` | Compact | Quick overviews, structured extraction with JSON schema |
 
 ## Development
 
-You can use npm scripts directly:
-
 ```bash
 npm install
-npm run format
-npm run check
+npm run check          # biome + typecheck + tests (84 unit tests)
+npm run test:integration  # real API tests (requires EXA_API_KEY)
 ```
 
-Or the equivalent Make targets:
+## Upstream
 
-```bash
-make install
-make format
-make check
-```
+This is a hard fork of [`najibninaba/pi-exa-search`](https://github.com/najibninaba/pi-exa-search). The upstream project provides a focused, well-tested search-with-highlights tool. This fork diverges significantly by covering the full Exa API surface. We've offered to upstream these changes — see the discussion on the original repo.
 
-The repo includes:
+## License
 
-- Biome for formatting and linting
-- TypeScript for typechecking
-- Vitest with coverage thresholds for tests
-- GitHub Actions CI on push and pull request
+[MIT](LICENSE)
