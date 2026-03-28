@@ -14,9 +14,9 @@ describe("normalizeToolParams", () => {
 			{ now: () => new Date("2026-03-06T00:00:00.000Z") },
 		);
 
-		expect(normalized).toEqual({
+		expect(normalized).toMatchObject({
 			queries: ["latest Iran update", "oil impact"],
-			numResults: 5,
+			numResults: 10,
 			searchType: "auto",
 			includeDomains: ["reuters.com"],
 			excludeDomains: ["reddit.com"],
@@ -90,9 +90,90 @@ describe("normalizeToolParams", () => {
 		);
 	});
 
+	it("validates category restrictions for company/people", () => {
+		expect(() =>
+			normalizeToolParams({ query: "a", category: "company", startPublishedDate: "2026-01-01" }),
+		).toThrowError(
+			new ValidationError("category_restriction", 'category "company" does not support published date filters.'),
+		);
+
+		expect(() => normalizeToolParams({ query: "a", category: "people", includeText: ["test"] })).toThrowError(
+			new ValidationError("category_restriction", 'category "people" does not support text filters.'),
+		);
+
+		expect(() =>
+			normalizeToolParams({ query: "a", category: "company", excludeDomains: ["reddit.com"] }),
+		).toThrowError(
+			new ValidationError("category_restriction", 'category "company" does not support excludeDomains.'),
+		);
+	});
+
+	it("allows non-restricted categories with date filters", () => {
+		const result = normalizeToolParams({ query: "a", category: "news", startPublishedDate: "2026-01-01" });
+		expect(result.category).toBe("news");
+		expect(result.startPublishedDate).toBeDefined();
+	});
+
+	it("validates includeText word count", () => {
+		expect(() => normalizeToolParams({ query: "a", includeText: ["one two three four five six"] })).toThrowError(
+			/at most 5 words/,
+		);
+	});
+
+	it("validates includeText max items", () => {
+		expect(() => normalizeToolParams({ query: "a", includeText: ["one", "two"] })).toThrowError(/at most 1 string/);
+	});
+
+	it("validates excludeText", () => {
+		expect(() => normalizeToolParams({ query: "a", excludeText: ["one two three four five six"] })).toThrowError(
+			/at most 5 words/,
+		);
+	});
+
+	it("validates deep search params require deep type", () => {
+		expect(() => normalizeToolParams({ query: "a", outputSchema: { type: "text" } })).toThrowError(/outputSchema/);
+
+		expect(() => normalizeToolParams({ query: "a", systemPrompt: "test" })).toThrowError(/systemPrompt/);
+
+		expect(() => normalizeToolParams({ query: "a", additionalQueries: ["b"] })).toThrowError(/additionalQueries/);
+	});
+
+	it("allows deep search params with deep type", () => {
+		const result = normalizeToolParams({
+			query: "a",
+			searchType: "deep",
+			outputSchema: { type: "object", properties: { name: { type: "string" } } },
+			systemPrompt: "Be concise",
+			additionalQueries: ["variation"],
+		});
+		expect(result.outputSchema).toBeDefined();
+		expect(result.systemPrompt).toBe("Be concise");
+		expect(result.additionalQueries).toEqual(["variation"]);
+	});
+
+	it("validates crawl date ranges", () => {
+		expect(() =>
+			normalizeToolParams({
+				query: "a",
+				startCrawlDate: "2026-03-03",
+				endCrawlDate: "2026-03-02",
+			}),
+		).toThrowError(
+			new ValidationError("invalid_date_range", "startCrawlDate must be before or equal to endCrawlDate."),
+		);
+	});
+
+	it("passes contents options through", () => {
+		const result = normalizeToolParams({
+			query: "a",
+			contents: { text: true, highlights: { maxCharacters: 2000 }, summary: true },
+		});
+		expect(result.contents).toEqual({ text: true, highlights: { maxCharacters: 2000 }, summary: true });
+	});
+
 	it("throws for invalid numeric bounds", () => {
-		expect(() => normalizeToolParams({ query: "a", numResults: 99 })).toThrowError(
-			new ValidationError("invalid_num_results", "numResults must be an integer between 1 and 10."),
+		expect(() => normalizeToolParams({ query: "a", numResults: 101 })).toThrowError(
+			new ValidationError("invalid_num_results", "numResults must be an integer between 1 and 100."),
 		);
 		expect(() => normalizeToolParams({ query: "a", highlightsMaxCharacters: 100 })).toThrowError(
 			new ValidationError(

@@ -1,9 +1,14 @@
 import {
+	DEEP_SEARCH_TYPES,
 	DEFAULT_HIGHLIGHTS_MAX_CHARACTERS,
 	DEFAULT_NUM_RESULTS,
+	MAX_EXCLUDE_TEXT_ITEMS,
 	MAX_HIGHLIGHTS_MAX_CHARACTERS,
+	MAX_INCLUDE_TEXT_ITEMS,
+	MAX_INCLUDE_TEXT_WORDS,
 	MAX_NUM_RESULTS,
 	MIN_HIGHLIGHTS_MAX_CHARACTERS,
+	RESTRICTED_CATEGORIES,
 } from "./constants.js";
 import { ValidationError } from "./errors.js";
 import type { EffectiveSearchParams, RawToolParams } from "./types.js";
@@ -25,7 +30,7 @@ function normalizeQueryList(query?: string, queries?: string[]): string[] {
 	return normalized;
 }
 
-function normalizeDomainValue(raw: string): string {
+export function normalizeDomainValue(raw: string): string {
 	const trimmed = raw.trim();
 	if (!trimmed) {
 		throw new ValidationError("invalid_domain", "Domain filters cannot contain empty values.");
@@ -45,7 +50,10 @@ function normalizeDomainValue(raw: string): string {
 	return normalized;
 }
 
-function mergeDomains(raw: RawToolParams): { includeDomains: string[]; excludeDomains: string[] } {
+export function mergeDomains(raw: Pick<RawToolParams, "domainFilter" | "includeDomains" | "excludeDomains">): {
+	includeDomains: string[];
+	excludeDomains: string[];
+} {
 	const includeDomains = [...(raw.includeDomains ?? [])];
 	const excludeDomains = [...(raw.excludeDomains ?? [])];
 
@@ -69,7 +77,7 @@ function mergeDomains(raw: RawToolParams): { includeDomains: string[]; excludeDo
 	return { includeDomains: normalizedIncludes, excludeDomains: normalizedExcludes };
 }
 
-function normalizeDate(value: string, bound: "start" | "end"): string {
+export function normalizeDate(value: string, bound: "start" | "end"): string {
 	if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
 		const [year, month, day] = value.split("-").map(Number);
 		const date =
@@ -95,6 +103,85 @@ function recencyStartDate(now: Date, recencyFilter: NonNullable<RawToolParams["r
 	return date.toISOString();
 }
 
+function validateTextFilters(raw: RawToolParams): void {
+	if (raw.includeText) {
+		if (raw.includeText.length > MAX_INCLUDE_TEXT_ITEMS) {
+			throw new ValidationError(
+				"invalid_include_text",
+				`includeText supports at most ${MAX_INCLUDE_TEXT_ITEMS} string.`,
+			);
+		}
+		for (const text of raw.includeText) {
+			const wordCount = text.trim().split(/\s+/).length;
+			if (wordCount > MAX_INCLUDE_TEXT_WORDS) {
+				throw new ValidationError(
+					"invalid_include_text",
+					`includeText entries must be at most ${MAX_INCLUDE_TEXT_WORDS} words. Got ${wordCount}: "${text}"`,
+				);
+			}
+		}
+	}
+	if (raw.excludeText) {
+		if (raw.excludeText.length > MAX_EXCLUDE_TEXT_ITEMS) {
+			throw new ValidationError(
+				"invalid_exclude_text",
+				`excludeText supports at most ${MAX_EXCLUDE_TEXT_ITEMS} string.`,
+			);
+		}
+		for (const text of raw.excludeText) {
+			const wordCount = text.trim().split(/\s+/).length;
+			if (wordCount > MAX_INCLUDE_TEXT_WORDS) {
+				throw new ValidationError(
+					"invalid_exclude_text",
+					`excludeText entries must be at most ${MAX_INCLUDE_TEXT_WORDS} words. Got ${wordCount}: "${text}"`,
+				);
+			}
+		}
+	}
+}
+
+function validateCategoryRestrictions(raw: RawToolParams): void {
+	if (!raw.category) return;
+	if (!RESTRICTED_CATEGORIES.includes(raw.category)) return;
+
+	const cat = raw.category;
+	if (raw.startPublishedDate || raw.endPublishedDate) {
+		throw new ValidationError("category_restriction", `category "${cat}" does not support published date filters.`);
+	}
+	if (raw.startCrawlDate || raw.endCrawlDate) {
+		throw new ValidationError("category_restriction", `category "${cat}" does not support crawl date filters.`);
+	}
+	if (raw.includeText?.length || raw.excludeText?.length) {
+		throw new ValidationError("category_restriction", `category "${cat}" does not support text filters.`);
+	}
+	if (raw.excludeDomains?.length || raw.domainFilter?.some((d) => d.startsWith("-"))) {
+		throw new ValidationError("category_restriction", `category "${cat}" does not support excludeDomains.`);
+	}
+}
+
+function validateDeepSearchParams(raw: RawToolParams): void {
+	const isDeep = raw.searchType && DEEP_SEARCH_TYPES.includes(raw.searchType);
+
+	if (raw.outputSchema && !isDeep) {
+		throw new ValidationError(
+			"deep_only_param",
+			"outputSchema is only supported with deep or deep-reasoning search types.",
+		);
+	}
+	if (raw.additionalQueries?.length && !isDeep) {
+		throw new ValidationError(
+			"deep_only_param",
+			"additionalQueries is only supported with deep or deep-reasoning search types.",
+		);
+	}
+	if (raw.systemPrompt && !isDeep) {
+		throw new ValidationError(
+			"deep_only_param",
+			"systemPrompt is only supported with deep or deep-reasoning search types.",
+		);
+	}
+}
+
 export function normalizeToolParams(raw: RawToolParams, options?: { now?: () => Date }): EffectiveSearchParams {
 	if (raw.recencyFilter && (raw.startPublishedDate || raw.endPublishedDate)) {
 		throw new ValidationError(
@@ -102,6 +189,10 @@ export function normalizeToolParams(raw: RawToolParams, options?: { now?: () => 
 			"Use either recencyFilter or explicit published date bounds, not both.",
 		);
 	}
+
+	validateTextFilters(raw);
+	validateCategoryRestrictions(raw);
+	validateDeepSearchParams(raw);
 
 	const queries = normalizeQueryList(raw.query, raw.queries);
 	const { includeDomains, excludeDomains } = mergeDomains(raw);
@@ -139,14 +230,31 @@ export function normalizeToolParams(raw: RawToolParams, options?: { now?: () => 
 		);
 	}
 
+	const startCrawlDate = raw.startCrawlDate ? normalizeDate(raw.startCrawlDate, "start") : undefined;
+	const endCrawlDate = raw.endCrawlDate ? normalizeDate(raw.endCrawlDate, "end") : undefined;
+	if (startCrawlDate && endCrawlDate && startCrawlDate > endCrawlDate) {
+		throw new ValidationError("invalid_date_range", "startCrawlDate must be before or equal to endCrawlDate.");
+	}
+
 	return {
 		queries,
 		numResults,
 		searchType: raw.searchType ?? "auto",
+		category: raw.category,
+		userLocation: raw.userLocation,
 		includeDomains,
 		excludeDomains,
 		startPublishedDate,
 		endPublishedDate,
+		startCrawlDate,
+		endCrawlDate,
+		includeText: raw.includeText,
+		excludeText: raw.excludeText,
+		moderation: raw.moderation,
 		highlightsMaxCharacters,
+		additionalQueries: raw.additionalQueries,
+		systemPrompt: raw.systemPrompt,
+		outputSchema: raw.outputSchema,
+		contents: raw.contents,
 	};
 }

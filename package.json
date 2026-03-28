@@ -1,5 +1,5 @@
 {
-	"name": "pi-exa-search",
+	"name": "pi-exa",
 	"version": "0.1.3",
 	"description": "Exa-powered source discovery and search workflows for Pi.",
 	"type": "module",
@@ -14,12 +14,12 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/najibninaba/pi-exa-search.git"
+		"url": "git+https://github.com/bdmorin/pi-exa-search.git"
 	},
 	"bugs": {
-		"url": "https://github.com/najibninaba/pi-exa-search/issues"
+		"url": "https://github.com/bdmorin/pi-exa-search/issues"
 	},
-	"homepage": "https://github.com/najibninaba/pi-exa-search#readme",
+	"homepage": "https://github.com/bdmorin/pi-exa-search#readme",
 	"files": [
 		"extensions",
 		"skills",
@@ -33,6 +33,7 @@
 		"lint": "biome lint .",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest --run --coverage",
+		"test:integration": "vitest --run --config vitest.integration.config.ts",
 		"test:watch": "vitest",
 		"check": "biome check . && npm run typecheck && npm run test",
 		"prepublishOnly": "npm run check",

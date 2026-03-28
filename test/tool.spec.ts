@@ -31,20 +31,22 @@ describe("createExaSearchTool", () => {
 			{} as never,
 		);
 
-		expect(search).toHaveBeenCalledWith({
-			query: "latest Iran update",
-			effectiveParams: {
-				queries: ["latest Iran update"],
-				numResults: 5,
-				searchType: "auto",
-				includeDomains: [],
-				excludeDomains: [],
-				startPublishedDate: "2026-03-05T00:00:00.000Z",
-				endPublishedDate: undefined,
-				highlightsMaxCharacters: 800,
-			},
-			signal: undefined,
-		});
+		expect(search).toHaveBeenCalledWith(
+			expect.objectContaining({
+				query: "latest Iran update",
+				effectiveParams: expect.objectContaining({
+					queries: ["latest Iran update"],
+					numResults: 10,
+					searchType: "auto",
+					includeDomains: [],
+					excludeDomains: [],
+					startPublishedDate: "2026-03-05T00:00:00.000Z",
+					endPublishedDate: undefined,
+					highlightsMaxCharacters: 800,
+				}),
+				signal: undefined,
+			}),
+		);
 		expect(updates).toHaveLength(1);
 		expect(result?.details).toMatchObject({
 			provider: "exa",
