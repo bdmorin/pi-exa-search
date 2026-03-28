@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { createExaSearchClient } from "../../extensions/exa-client.js";
 import type { EffectiveSearchParams } from "../../extensions/types.js";

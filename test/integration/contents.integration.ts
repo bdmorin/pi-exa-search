@@ -48,7 +48,10 @@ describe("Contents Integration", () => {
 
 	it("fetches multiple URLs", async () => {
 		const result = await fetchContents(apiKey, {
-			urls: ["https://en.wikipedia.org/wiki/Python_(programming_language)", "https://en.wikipedia.org/wiki/TypeScript"],
+			urls: [
+				"https://en.wikipedia.org/wiki/Python_(programming_language)",
+				"https://en.wikipedia.org/wiki/TypeScript",
+			],
 			contents: { highlights: { maxCharacters: 1000 } },
 		});
 
